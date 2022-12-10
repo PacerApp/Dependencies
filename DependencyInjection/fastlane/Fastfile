@@ -35,6 +35,7 @@ platform :ios do
     zip(path: "Products/#{options[:scheme]}.xcframework", output_path: "#{options[:version]}/framework.zip")
     sh("cd ../.. && echo $(cat #{options[:scheme]}.json | jq '. + {\"#{options[:version]}\": \"https://raw.githubusercontent.com/PacerApp/Dependencies/main/#{options[:scheme]}/#{options[:version]}/framework.zip\"}') > #{options[:scheme]}.json")
     sh("cd ../.. && jq . #{options[:scheme]}.json")
+    sh("cd ../ && rm -rf Products")
   end
 
   lane :publish do |options|
