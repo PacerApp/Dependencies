@@ -1,0 +1,52 @@
+default_platform(:ios)
+
+project_name="DependencyInjection"
+package = "DependencyInjection"
+
+platform :ios do
+  before_all do |lane, options|
+    prepare
+  end
+
+  desc "Prepares the project"
+  lane :prepare do
+    download_repo
+    sh("cp -r ../project.yml DependencyInjection/")
+    sh("cp -r ../Info.plist DependencyInjection/Sources")
+    sh("rm -rf iOS-Configuration")
+    sh("cd DependencyInjection && xcodegen")
+  end
+
+  desc "Generates the xcframework"
+  lane :export_xcframework do |options|
+    sh("rm -rf ../Products")
+    create_xcframework(
+      scheme: options[:scheme],
+      workspace: "fastlane/DependencyInjection/DependencyInjection.xcodeproj/project.xcworkspace",
+      include_dSYMs: true,
+      include_BCSymbolMaps: false,
+      include_debug_symbols: true,
+      enable_bitcode: true,
+      destinations: ['iOS', 'macOS', 'watchOS'],
+      xcframework_output_directory: 'Products',
+      remove_xcarchives: true
+    )
+    # sh("mkdir -p Dependencies/#{options[:scheme]}/#{options[:version]}")
+    # zip(path: "Products/#{options[:scheme]}.xcframework", output_path: "fastlane/Dependencies/#{options[:scheme]}/#{options[:version]}/framework.zip")
+    # sh("echo $(cat Dependencies/#{options[:scheme]}.json | jq '. + {\"#{options[:version]}\": \"https://raw.githubusercontent.com/PacerApp/Dependencies/main/#{options[:scheme]}/#{options[:version]}/framework.zip\"}') > Dependencies/#{options[:scheme]}.json")
+    # sh("jq . Dependencies/#{options[:scheme]}.json")
+  end
+
+  lane :publish do |options|
+    sh("rm -rf Dependencies")
+    sh("git clone https://github.com/PacerApp/Dependencies.git")
+    export_xcframework(scheme: "DependencyInjection", version: options[:version])
+    sh("cd Dependencies && git add . && git commit -m 'publish #{project_name} to #{options[:version]}' && git push")
+    sh("rm -rf Dependencies")
+  end
+
+  private_lane :download_repo do
+    sh("cd ../.. && git checkout main && git pull")
+    sh("git clone https://github.com/AlbGarciam/DependencyInjection.git")
+  end
+end

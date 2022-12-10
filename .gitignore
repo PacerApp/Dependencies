@@ -1,0 +1,26 @@
+.DS_Store
+/.build
+/Packages
+/*.xcodeproj
+xcuserdata/
+.swiftpm/
+*.sh
+built-product/
+build/
+*-Compiled/
+*.lock.json
+*.lock
+
+# Fastlane
+*/fastlane/README.md
+*/fastlane/report.xml
+Products/
+
+# Xcodegen
+configuration.yml
+
+# Carthage
+Cartfile
+Cartfile.resolved
+Carthage/
+*.lock
