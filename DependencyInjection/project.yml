@@ -1,5 +1,3 @@
-include:
-  - configuration.yml
 name: DependencyInjection
 options:
   deploymentTarget:

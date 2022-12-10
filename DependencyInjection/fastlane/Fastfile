@@ -31,18 +31,16 @@ platform :ios do
       xcframework_output_directory: 'Products',
       remove_xcarchives: true
     )
-    # sh("mkdir -p Dependencies/#{options[:scheme]}/#{options[:version]}")
-    # zip(path: "Products/#{options[:scheme]}.xcframework", output_path: "fastlane/Dependencies/#{options[:scheme]}/#{options[:version]}/framework.zip")
-    # sh("echo $(cat Dependencies/#{options[:scheme]}.json | jq '. + {\"#{options[:version]}\": \"https://raw.githubusercontent.com/PacerApp/Dependencies/main/#{options[:scheme]}/#{options[:version]}/framework.zip\"}') > Dependencies/#{options[:scheme]}.json")
-    # sh("jq . Dependencies/#{options[:scheme]}.json")
+    sh("cd .. && mkdir -p #{options[:version]}")
+    zip(path: "Products/#{options[:scheme]}.xcframework", output_path: "#{options[:version]}/framework.zip")
+    sh("cd ../.. && echo $(cat #{options[:scheme]}.json | jq '. + {\"#{options[:version]}\": \"https://raw.githubusercontent.com/PacerApp/Dependencies/main/#{options[:scheme]}/#{options[:version]}/framework.zip\"}') > #{options[:scheme]}.json")
+    sh("cd ../.. && jq . #{options[:scheme]}.json")
   end
 
   lane :publish do |options|
-    sh("rm -rf Dependencies")
-    sh("git clone https://github.com/PacerApp/Dependencies.git")
     export_xcframework(scheme: "DependencyInjection", version: options[:version])
-    sh("cd Dependencies && git add . && git commit -m 'publish #{project_name} to #{options[:version]}' && git push")
-    sh("rm -rf Dependencies")
+    sh("rm -rf DependencyInjection")
+    sh("cd ../.. && git add . && git commit -m 'publish #{project_name} to #{options[:version]}' && git push")
   end
 
   private_lane :download_repo do
